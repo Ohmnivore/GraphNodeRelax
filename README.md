@@ -1,3 +1,6 @@
+
+![GraphNodeRelax](https://github.com/Ohmnivore/GraphNodeRelax/assets/3769354/ccc4ae22-7d1f-473b-945a-37bc44518e8e)
+
 # Graph Node Relax
 This is a Unity port of the [Node Relax Blender Addon](https://www.youtube.com/watch?v=QvNz3ON6e1I). It allows to organize and align nodes with a brush, by painting over them.
 
