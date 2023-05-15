@@ -13,6 +13,9 @@ Tested compatible systems are:
 
 It's possible to adapt it to other GraphView-based systems, should they not be compatible out of the box. (see `IGraphViewBuilder` and `DefaultGraphViewBuilder`)
 
+# Installation
+Install the package [from its git URL](https://docs.unity3d.com/Manual/upm-ui-giturl.html) or [from a local copy](https://docs.unity3d.com/Manual/upm-ui-local.html).
+
 # Default Keyboard Shortcuts
 * Toggle brush: Shift + R
 * Disable brush: Escape
