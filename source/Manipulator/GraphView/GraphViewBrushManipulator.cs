@@ -17,7 +17,7 @@ namespace GraphNodeRelax
         bool m_AttachedToPanel;
         bool m_Active;
         bool m_Brushing;
-        bool m_BrushingMoving;
+        int m_BrushCounter;
         bool m_HandlingMiddleMouse;
         bool m_HandlingContextualMenu;
         bool m_NeedsRefresh;
@@ -62,7 +62,8 @@ namespace GraphNodeRelax
                 m_NeedsRefresh = false;
             }
 
-            m_Relaxer.Apply(brush, !m_BrushingMoving, algorithmSettings);
+            m_Relaxer.Apply(brush, m_BrushCounter == 0, algorithmSettings);
+            m_BrushCounter++;
         }
 
         public void OnUndoRedo()
@@ -87,7 +88,7 @@ namespace GraphNodeRelax
         {
             m_Active = false;
             m_Brushing = false;
-            m_BrushingMoving = false;
+            m_BrushCounter = 0;
             m_HandlingMiddleMouse = false;
             m_HandlingContextualMenu = false;
             m_BrushResizer.Reset();
@@ -304,7 +305,7 @@ namespace GraphNodeRelax
             }
 
             m_Brushing = true;
-            m_BrushingMoving = false;
+            m_BrushCounter = 0;
 
             evt.StopImmediatePropagation();
         }
@@ -346,8 +347,6 @@ namespace GraphNodeRelax
                 m_HandlingMiddleMouse = true;
                 return;
             }
-
-            m_BrushingMoving = true;
 
             evt.StopPropagation();
         }

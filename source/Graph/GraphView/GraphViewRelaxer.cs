@@ -82,6 +82,14 @@ namespace GraphNodeRelax
             // At this point we know which nodes are stacks
             foreach (var cacheNode in m_Cache)
             {
+                cacheNode.AllInputs.Capacity = cacheNode.Inputs.Count;
+                foreach (var input in cacheNode.Inputs)
+                    cacheNode.AllInputs.Add(input);
+
+                cacheNode.AllOutputs.Capacity = cacheNode.Outputs.Count;
+                foreach (var output in cacheNode.Outputs)
+                    cacheNode.AllOutputs.Add(output);
+
                 if (cacheNode.IsStack)
                 {
                     // Is this node technically a stack but not connected to any stacks?
@@ -95,10 +103,51 @@ namespace GraphNodeRelax
                     }
                 }
             }
+
+            // Order by outside-in, starting by the leaves.
+            // This ensures optimal relax solution: the most independant nodes are solved first.
+            var orderedCache = new List<GraphViewCacheNode>();
+            foreach (var cacheNode in m_Cache)
+            {
+                var noInputs = cacheNode.AllInputs.Count == 0;
+                var noOutputs = cacheNode.AllOutputs.Count == 0;
+
+                if (noInputs != noOutputs ||
+                    (noInputs && noOutputs))
+                {
+                    orderedCache.Add(cacheNode);
+                }
+            }
+            var lastFilled = 0;
+            while (orderedCache.Count != m_Cache.Count)
+            {
+                var filled = orderedCache.Count;
+
+                for (int i = lastFilled; i < filled; i++)
+                {
+                    var cacheNode = orderedCache[i];
+
+                    foreach (GraphViewCacheNode input in cacheNode.AllInputs)
+                    {
+                        orderedCache.AddUnique(input);
+                    }
+                    foreach (GraphViewCacheNode output in cacheNode.AllOutputs)
+                    {
+                        orderedCache.AddUnique(output);
+                    }
+                }
+
+                lastFilled += filled;
+            }
+            m_Cache = orderedCache;
         }
 
         public override void Apply(Brush brush, bool reset, AlgorithmSettings settings)
         {
+#if ALGORITHM_DEBUG
+            DebugRectElement.DebugParent(m_GraphView.contentViewContainer);
+#endif
+
             if (reset)
             {
                 m_HasRegisteredUndo.Clear();

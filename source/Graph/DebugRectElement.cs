@@ -1,4 +1,5 @@
 #if ALGORITHM_DEBUG
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,6 +7,19 @@ namespace GraphNodeRelax
 {
     class DebugRectElement : VisualElement
     {
+        static VisualElement parentElement;
+        static CacheNode debugNode;
+
+        public static void DebugParent(VisualElement parent)
+        {
+            parentElement = parent;
+        }
+
+        public static void DebugNode(CacheNode node)
+        {
+            debugNode = node;
+        }
+
         public DebugRectElement(Color color, bool vertical = true)
         {
             style.borderLeftWidth = style.borderRightWidth = style.borderTopWidth = style.borderBottomWidth = 1f;
@@ -14,7 +28,7 @@ namespace GraphNodeRelax
 
             pickingMode = PickingMode.Ignore;
 
-            graphView.contentViewContainer.Add(this);
+            parentElement.Add(this);
         }
 
         public void Reset()
@@ -27,13 +41,13 @@ namespace GraphNodeRelax
 
         public void SetRect(Rect rect, CacheNode node)
         {
-                if (node != debugNode)
-                    return;
+            if (node != debugNode)
+                return;
 
-                style.top = rect.y;
-                style.left = rect.x;
-                style.width = rect.width;
-                style.height = rect.height;
+            style.top = rect.y;
+            style.left = rect.x;
+            style.width = rect.width;
+            style.height = rect.height;
         }
     }
 }

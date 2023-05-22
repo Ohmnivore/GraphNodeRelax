@@ -44,10 +44,14 @@ namespace GraphNodeRelax
         /// </summary>
         public List<CacheNode> Inputs { get; } = new List<CacheNode>();
 
+        public List<CacheNode> AllInputs { get; } = new List<CacheNode>();
+
         /// <summary>
         /// List of connected output nodes
         /// </summary>
         public List<CacheNode> Outputs { get; } = new List<CacheNode>();
+
+        public List<CacheNode> AllOutputs { get; } = new List<CacheNode>();
 
         /// <summary>
         /// The position and size of the node without any filtering applied.
@@ -56,10 +60,10 @@ namespace GraphNodeRelax
         Rect? m_UnfilteredRect;
 
         /// <summary>
-        /// The dragging, relaxation, and collision algorithms can jitter a bit due to execution order,
-        /// since it is very small jitter let's just filter it out.
+        /// The relax algos run instantly, which would be jarring to see.
+        /// This filtering is done to make it look pleasant.
         /// </summary>
-        OneEuroFilter<Vector2> m_Filter = new OneEuroFilter<Vector2>(30f);
+        EMAFilter m_Filter = new EMAFilter(30);
 
         /// <summary>
         /// To be able to tell if the node is moving on the screen (from user input or residual filtering).
@@ -114,13 +118,15 @@ namespace GraphNodeRelax
             if (m_UnfilteredRect is { } rect)
             {
                 // What we actually want to see in the GraphView at all times is the filtered position
-                var filteredPosition = m_Filter.Filter(rect.position);
+                m_Filter.Add(rect.position);
+                var filteredPosition = m_Filter.Average;
                 rect.position = filteredPosition;
 
                 SetNodePosition(rect);
 
                 var positionChanged = filteredPosition != m_LastFilteredPosition;
                 m_LastFilteredPosition = filteredPosition;
+
                 return positionChanged;
             }
 
@@ -134,7 +140,7 @@ namespace GraphNodeRelax
         {
             m_UnfilteredRect = null;
             m_LastFilteredPosition = Vector2.zero;
-            m_Filter.Reset();
+            m_Filter.Reset(GetNodePosition().position);
         }
 
         /// <summary>

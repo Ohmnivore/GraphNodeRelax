@@ -23,21 +23,12 @@ namespace GraphNodeRelax
         }
 
         // From https://github.com/specoolar/NodeRelax-Blender-Addon/blob/main/operators/utils.py
-        public static Vector2 Relax(bool vertical, CacheNode node, float influence, float power, float collisionDistance, bool keepOneToOneEdgesStraight)
+        public static Vector2 Relax(bool vertical, CacheNode node, float collisionDistance, bool keepOneToOneEdgesStraight)
         {
-            if (Mathf.Approximately(0f, influence))
-                return Vector2.zero;
-
-            if (Mathf.Approximately(0f, power))
-                return Vector2.zero;
-
             #if ALGORITHM_DEBUG
             rectRelax1 ??= new DebugRectElement(Color.blue);
             rectRelax2 ??= new DebugRectElement(Color.green);
             #endif
-
-            // Add a tiny margin to avoid always triggering collision
-            collisionDistance += 1f;
 
             var locNode = node.GetPositionInGraph(!vertical);
             if (vertical)
@@ -51,6 +42,9 @@ namespace GraphNodeRelax
             foreach (var input in node.Inputs)
             {
                 var locOther = input.GetPositionInGraph(!vertical);
+                #if ALGORITHM_DEBUG
+                rectRelax1.SetRect(locOther, node);
+                #endif
                 if (vertical)
                     SwapXY(ref locOther);
 
@@ -90,7 +84,7 @@ namespace GraphNodeRelax
                 if (vertical)
                     SwapXY(ref locOther);
 
-                // Align to the left of the left-most input node
+                // Align to the left of the left-most output node
                 var outputLeft = locOther.x - locNode.width - collisionDistance;
                 if (hasOutput)
                     outputX = Mathf.Min(outputX, outputLeft);
@@ -134,26 +128,21 @@ namespace GraphNodeRelax
                 var offsetX = (averageX - locNode.x);
                 var offsetY = (averageY - locNode.y);
 
-                var offsetXInf = offsetX * power * influence;
-                var offsetYInf = offsetY * power * influence;
-
                 if (vertical)
-                    return new Vector2(offsetYInf, offsetXInf);
+                    return new Vector2(offsetY, offsetX);
                 else
-                    return new Vector2(offsetXInf, offsetYInf);
+                    return new Vector2(offsetX, offsetY);
             }
 
             return Vector2.zero;
         }
 
         // From https://github.com/specoolar/NodeRelax-Blender-Addon/blob/main/operators/utils.py
-        public static (Vector2 offset, int numCollisions) Collide(IEnumerable<CacheNode> allNodes, CacheNode node, float power, float collisionDistance)
+        public static Vector2 Collide(IEnumerable<CacheNode> allNodes, CacheNode node, float collisionDistance)
         {
-            if (Mathf.Approximately(0f, power))
-                return default;
-
             var offset = Vector2.zero;
-            var numCollisions = 0;
+            var numXCollisions = 0;
+            var numYCollisions = 0;
 
             #if ALGORITHM_DEBUG
             rectCollision1 ??= new DebugRectElement(Color.magenta);
@@ -181,10 +170,10 @@ namespace GraphNodeRelax
                         if (delta.y > 0f)
                             intersection.y *= -1f;
 
-                        var deltaY = intersection.y * power * 0.5f; // * 0.5f to let the other node also detect a collision vector
+                        var deltaY = intersection.y;
 
                         offset.y += deltaY;
-                        numCollisions++;
+                        numYCollisions++;
 
                         locNode.y += deltaY;
                         #if ALGORITHM_DEBUG
@@ -197,10 +186,10 @@ namespace GraphNodeRelax
                         if (delta.x > 0f)
                             intersection.x *= -1f;
 
-                        var deltaX = intersection.x * power * 0.5f; // * 0.5f to let the other node also detect a collision vector
+                        var deltaX = intersection.x;
 
                         offset.x += deltaX;
-                        numCollisions++;
+                        numXCollisions++;
 
                         locNode.x += deltaX;
                         #if ALGORITHM_DEBUG
@@ -211,7 +200,10 @@ namespace GraphNodeRelax
                 }
             }
 
-            return (offset, numCollisions);
+            offset.x /= Mathf.Max(1, numXCollisions);
+            offset.y /= Mathf.Max(1, numYCollisions);
+
+            return offset;
         }
 
         // Swaps the X and Y position and dimensions of the rect (in-place)
@@ -225,7 +217,6 @@ namespace GraphNodeRelax
             rect.height = tempCopy.width;
         }
 
-#region Debug
 #if ALGORITHM_DEBUG
         static DebugRectElement rectRelax1;
         static DebugRectElement rectRelax2;
@@ -241,14 +232,6 @@ namespace GraphNodeRelax
             rectCollision2?.Reset();
             rectBounds?.Reset();
         }
-
-        static CacheNode debugNode;
-
-        public static void DebugNode(CacheNode node)
-        {
-            debugNode = node;
-        }
 #endif
-#endregion
     }
 }

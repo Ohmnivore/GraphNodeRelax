@@ -33,6 +33,16 @@ namespace GraphNodeRelax
                 debugTarget = 2;
             if (keyboard.digit4Key.isPressed)
                 debugTarget = 3;
+            if (keyboard.digit5Key.isPressed)
+                debugTarget = 4;
+            if (keyboard.digit6Key.isPressed)
+                debugTarget = 5;
+            if (keyboard.digit7Key.isPressed)
+                debugTarget = 6;
+            if (keyboard.digit8Key.isPressed)
+                debugTarget = 7;
+            if (keyboard.digit9Key.isPressed)
+                debugTarget = 8;
 #endif
 
             if (reset)
@@ -50,7 +60,7 @@ namespace GraphNodeRelax
 #if ALGORITHM_DEBUG
                 if (idx == debugTarget)
                 {
-                    Algorithm.DebugNode(node);
+                    DebugRectElement.DebugNode(node);
                 }
                 idx++;
 #endif
@@ -61,39 +71,15 @@ namespace GraphNodeRelax
                 if (Mathf.Approximately(0f, influence))
                     continue;
 
-                var relaxVector = Algorithm.Relax(node.IsStack && !node.TreatStackAsNormalNode, node, influence, settings.RelaxPower, settings.Distance, settings.KeepOneToOneEdgesStraight);
-                var (collideVector, numCollisions) = Algorithm.Collide(m_Cache, node, settings.CollisionPower, settings.Distance);
+                var relaxVector = Algorithm.Relax(node.IsStack && !node.TreatStackAsNormalNode, node, settings.Distance, settings.KeepOneToOneEdgesStraight);
 
-                if (collideVector.magnitude < Mathf.Epsilon)
-                    collideVector = Vector2.zero;
-                else if (numCollisions == 1)
-                {
-                    // Prevent relax from moving in the direction that collision is coming from.
-                    // (This is only safe to assume when there aren't multiple collisions.)
+                rect.position += relaxVector;
+                node.SetPosition(rect, false);
 
-                    var collideSourceVector = -collideVector;
-                    if (Vector2.Dot(relaxVector, collideSourceVector) > 0f)
-                    {
-                        var relaxRejection = ProjectVector(relaxVector, collideSourceVector);
-                        relaxVector -= relaxRejection;
-                    }
-                }
+                var collideVector = Algorithm.Collide(m_Cache, node, settings.Distance);
 
-                collideVector *= influence;
-
-                if (collideVector.magnitude < 0.01f)
-                    collideVector = Vector2.zero;
-
-                if (relaxVector.magnitude < 0.01f)
-                    relaxVector = Vector2.zero;
-
-#if ALGORITHM_DEBUG
-                Debug.Log($"{idx}: relax: {relaxVector.x} {relaxVector.y} | collide: {collideVector.x} {collideVector.y}");
-#endif
-
-                var nodePosition = node.GetPositionInGraph(false);
-                nodePosition.position += relaxVector + collideVector;
-                node.SetPosition(nodePosition, false);
+                rect.position += collideVector;
+                node.SetPosition(rect, false);
             }
 
             foreach (var node in m_Cache)
@@ -143,18 +129,6 @@ namespace GraphNodeRelax
             var influence = 1f - (distSqr / (brush.Radius * brush.Radius));
             influence = Mathf.Clamp01(influence);
             return influence;
-        }
-
-        static Vector2 ProjectVector(Vector2 vector, Vector2 onNormal)
-        {
-            var sqrMagnitude = Vector2.Dot(onNormal, onNormal);
-            if (sqrMagnitude < Mathf.Epsilon)
-            {
-                return Vector2.zero;
-            }
-
-            var dot = Vector2.Dot(vector, onNormal);
-            return new Vector2(onNormal.x * dot / sqrMagnitude, onNormal.y * dot / sqrMagnitude);
         }
     }
 }

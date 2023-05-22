@@ -26,7 +26,6 @@ Customize the shorcuts and more under: Edit > Preferences > Graph Node Relax
 
 # Acknowledgements
 * [Node Relax Blender Addon](https://github.com/specoolar/NodeRelax-Blender-Addon) by [Shahzod Boyhonov](https://twitter.com/specoolar)
-* [1€ Filter implementation](https://github.com/DarioMazzanti/OneEuroFilterUnity) by [Dario Mazzanti](https://www.dariomazzanti.com)
 
 # Graph Tools Foundation
 GraphView-specific code has been abstracted away in anticipation. Still, some amount of new code would need to be written for a GTF-specific brush manipulator, relaxer, and cache builder.

@@ -35,17 +35,9 @@ namespace GraphNodeRelax
         [Min(5f)]
         public float Distance = 40f;
 
-        [Tooltip("The strength of the force that pushes nodes together and apart.")]
-        [Range(0f, 1f)]
-        public float RelaxPower = 0.1f;
-
         [Tooltip("The strength of the force that pushes nodes in the direction of brush movement.")]
-        [Range(0f, 1f)]
-        public float SlidePower = 0.6f;
-
-        [Tooltip("The strength of the force that pushes overlapping nodes apart.")]
-        [Range(0f, 1f)]
-        public float CollisionPower = 0.9f;
+        [Range(0f, 4f)]
+        public float SlidePower = 0.9f;
     }
 
     [Serializable]
