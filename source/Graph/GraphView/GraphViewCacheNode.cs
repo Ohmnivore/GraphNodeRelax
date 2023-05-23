@@ -18,7 +18,7 @@ namespace GraphNodeRelax
         /// The <see cref="GraphView.Scope"/> (Group) that this Node belongs to, if any.
         /// Nodes from different scopes shouldn't interact with each other.
         /// </summary>
-        public Scope Scope { get; set; }
+        public Scope Scope { get; internal set; }
 
         /// <summary>
         /// The <see cref="GraphView"/> that this node belongs to

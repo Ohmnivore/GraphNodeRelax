@@ -52,6 +52,7 @@ namespace GraphNodeRelax
                         };
 
                         nodeToCachedNode.Add(node, newCacheStackLikeNode);
+                        newCacheStackLikeNode.Scope = node.GetContainingScope();
                         m_Cache.Add(newCacheStackLikeNode);
                     }
                 }
@@ -67,6 +68,7 @@ namespace GraphNodeRelax
                     };
 
                     nodeToCachedNode.Add(node, cacheNode);
+                    cacheNode.Scope = node.GetContainingScope();
                     m_Cache.Add(cacheNode);
                 }
             }

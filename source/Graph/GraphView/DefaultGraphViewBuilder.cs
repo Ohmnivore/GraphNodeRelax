@@ -86,8 +86,6 @@ namespace GraphNodeRelax
         /// <param name="nodeToCacheNode">Map of known <see cref="Node"/>s to their cached representations</param>
         public static void FindNeighbors(GraphViewCacheNode node, Dictionary<Node, GraphViewCacheNode> nodeToCacheNode)
         {
-            node.Scope = node.Node.GetContainingScope();
-
             var siblings = new HashSet<GraphElement>();
             node.Node.CollectElements(siblings, x => true);
 
